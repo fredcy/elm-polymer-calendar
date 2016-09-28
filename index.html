@@ -26337,11 +26337,18 @@ var _user$project$Native_JsonDateDecode = function() {
             return _elm_lang$core$Result$Err("not a date value");
         }
     }
+
+    function toJson(date) {
+        return date.toJSON();
+    }
+
     return {
         toDate: toDate,
+        toJson: toJson,
     }
 }();
 
+var _user$project$JsonDateDecode$toJson = _user$project$Native_JsonDateDecode.toJson;
 var _user$project$JsonDateDecode$toDate = _user$project$Native_JsonDateDecode.toDate;
 
 var _user$project$Main$datePicker = _elm_lang$html$Html$node('paper-date-picker');
@@ -26350,19 +26357,7 @@ var _user$project$Main$detailValue = A2(
 	_elm_lang$core$Native_List.fromArray(
 		['detail', 'value']),
 	_elm_lang$core$Json_Decode$value);
-var _user$project$Main$onValueChanged = function (tagger) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'date-changed',
-		A2(_elm_lang$core$Json_Decode$map, tagger, _user$project$Main$detailValue));
-};
-var _user$project$Main$valueToDate = function (val) {
-	var dateResult = A2(
-		_elm_lang$core$Debug$log,
-		'dateResult',
-		_user$project$JsonDateDecode$toDate(val));
-	return dateResult;
-};
+var _user$project$Main$dateValue = A2(_elm_lang$core$Json_Decode$customDecoder, _user$project$Main$detailValue, _user$project$JsonDateDecode$toDate);
 var _user$project$Main$day = 24 * _elm_lang$core$Time$hour;
 var _user$project$Main$addTime = F2(
 	function (time, date) {
@@ -26386,10 +26381,7 @@ var _user$project$Main$update = F2(
 			case 'Add30Days':
 				return A2(_user$project$Main$addTime, 30 * _user$project$Main$day, model);
 			default:
-				return A2(
-					_elm_lang$core$Result$withDefault,
-					model,
-					_user$project$JsonDateDecode$toDate(_p0._0));
+				return _p0._0;
 		}
 	});
 var _user$project$Main$nowCmd = function (tagger) {
@@ -26408,7 +26400,7 @@ var _user$project$Main$DateChanged = function (a) {
 var _user$project$Main$Add30Days = {ctor: 'Add30Days'};
 var _user$project$Main$AddADay = {ctor: 'AddADay'};
 var _user$project$Main$view = function (model) {
-	var dateString = A2(_mgold$elm_date_format$Date_Format$format, '%Y-%m-%d %H:%M:%S', model);
+	var dateString = _user$project$JsonDateDecode$toJson(model);
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
@@ -26449,7 +26441,10 @@ var _user$project$Main$view = function (model) {
 				_elm_lang$core$Native_List.fromArray(
 					[
 						A2(_elm_lang$html$Html_Attributes$attribute, 'date', dateString),
-						_user$project$Main$onValueChanged(_user$project$Main$DateChanged)
+						A2(
+						_elm_lang$html$Html_Events$on,
+						'date-changed',
+						A2(_elm_lang$core$Json_Decode$map, _user$project$Main$DateChanged, _user$project$Main$dateValue))
 					]),
 				_elm_lang$core$Native_List.fromArray(
 					[]))
